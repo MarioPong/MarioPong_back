@@ -95,6 +95,7 @@ app.get("/api/user/logout", auth, async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, message: "사용자를 찾을 수 없습니다." })
     }
+    res.clearCookie("x_auth")
     return res.status(200).json({ success: true })
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message })
