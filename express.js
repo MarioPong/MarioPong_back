@@ -8,10 +8,22 @@ const app = express()
 const port = process.env.PORT || 3000
 const host = '0.0.0.0'
 
+const allowedOrigins = [
+  'http://127.0.0.1:5500',
+  'https://effulgent-smakager-fbd602.netlify.app'
+];
+
 app.use(cors({
-  origin: 'http://127.0.0.1:5500',
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
-}))
+}));
+
 app.use(bodyParser.urlencoded({extended : true}))
 app.use(bodyParser.json())
 app.use(cookieParser())
