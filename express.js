@@ -40,6 +40,11 @@ app.post("/api/user/register", async (req, res) => {
   }
 })
 
+app.post("/api/user/isduplicated", async (req, res) => {
+  const isDuplicated = await User.isEmailDuplicated(req.body.id)
+  res.json({duplicated: isDuplicated})
+})
+
 app.post("/api/user/login", async (req, res) => {
   try {
     const { id, password } = req.body
