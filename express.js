@@ -3,6 +3,9 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
+const nodemailer = require('nodemailer')
+const bcrypt = require('bcrypt')
+require('dotenv').config()
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -11,7 +14,9 @@ const host = '0.0.0.0'
 const allowedOrigins = [
   'http://127.0.0.1:5500',
   'https://mario-pong.netlify.app'
-];
+]
+
+const saltRounds = 10
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -31,7 +36,7 @@ app.use(cookieParser())
 const User = require('./models/user')
 const auth = require('./middleware/auth')
 
-const url = "mongodb+srv://tlatamus0203:3PV3ZAuEL6MrXkfr@cluster23.cyyuqox.mongodb.net/?retryWrites=true&w=majority&appName=Cluster23"
+const url = process.env.MONGODB_URL
 
 mongoose.connect(url)
     .then(() => console.log('MongoDB connected'))
@@ -98,6 +103,52 @@ app.post("/api/user/login", async (req, res) => {
       message: "서버 오류가 발생했습니다.",
       error: err.message,
     })
+  }
+})
+
+app.post('/api/user/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ success: false, message: '이메일을 입력하세요.' });
+  }
+
+  try {
+    const user = await User.findOne({ id: email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: '등록된 이메일이 없습니다.' });
+    }
+
+    const tempPassword = Math.random().toString(36).slice(-8);
+
+    user.password = await bcrypt.hash(tempPassword, saltRounds);
+    await user.save();
+
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: process.env.EMAIL_USER, // 환경변수로 관리
+        pass: process.env.EMAIL_PASS
+      }
+    })
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'MarioPong 임시 비밀번호 안내',
+      text: `안녕하세요!\n\n임시 비밀번호는 ${tempPassword} 입니다.\n로그인 후 반드시 비밀번호를 변경해 주세요.`
+    }
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error(error)
+        return res.status(500).json({ success: false, message: '이메일 전송에 실패했습니다.' })
+      }
+      return res.status(200).json({ success: true, message: '임시 비밀번호가 이메일로 전송되었습니다.' })
+    })
+
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' })
   }
 })
 
