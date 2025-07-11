@@ -76,7 +76,7 @@ app.post("/api/user/login", async (req, res) => {
     if (!user) {
       return res.status(401).json({
         loginSuccess: false,
-        message: "아이디 또는 비밀번호가 올바르지 않습니다.",
+        message: "아이디가 존재하지 않습니다.",
       })
     }
 
@@ -120,10 +120,6 @@ app.post('/api/user/forgot-password', async (req, res) => {
 
     const tempPassword = Math.random().toString(36).slice(-8)
 
-    const originalPassword = user.password
-    user.password = await bcrypt.hash(tempPassword, saltRounds)
-    await user.save()
-
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -142,18 +138,40 @@ app.post('/api/user/forgot-password', async (req, res) => {
     transporter.sendMail(mailOptions, async (error, info) => {
       if (error) {
         console.error(error)
-        user.password = originalPassword
-        await user.save()
         return res.status(500).json({ success: false, message: '이메일 전송에 실패했습니다.' })
       }
+      user.password = tempPassword
+      await user.save()
       return res.status(200).json({ success: true, message: '임시 비밀번호가 이메일로 전송되었습니다.' })
     })
 
   } catch (err) {
     console.error(err)
-    user.password = originalPassword
-    await user.save()
     return res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' })
+  }
+})
+
+app.post('/api/user/change-password', async (req, res) => {
+  const email = req.body.id
+  const password = req.body.password
+  if (!email) {
+    return res.status(400).json({ success: false, message: '이메일을 입력하세요.' })
+  }
+  if (!password) {
+    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+  }
+
+  try {
+    const user = await User.findOne({ id: email })
+    if (!user) {
+      return res.status(404).json({ success: false, message: '등록된 이메일이 없습니다.' })
+    }
+
+    user.password = password
+    await user.save()
+    res.status(200).json({ success: true })
+  } catch (err) {
+    res.json({ success: false, err })
   }
 })
 
