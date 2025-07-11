@@ -85,7 +85,11 @@ app.post("/api/user/login", async (req, res) => {
 
     await user.generateToken()
     res
-      .cookie("x_auth", user.token)
+      .cookie("x_auth", user.token, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true
+      })
       .status(200)
       .json({ loginSuccess: true, userId: user._id })
   } catch (err) {
@@ -107,7 +111,11 @@ app.get("/api/user/logout", auth, async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, message: "사용자를 찾을 수 없습니다." })
     }
-    res.clearCookie("x_auth")
+    res.clearCookie("x_auth", {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true
+    })
     return res.status(200).json({ success: true })
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message })
