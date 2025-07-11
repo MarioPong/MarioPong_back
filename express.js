@@ -13,7 +13,8 @@ app.use(bodyParser.urlencoded({extended : true}))
 app.use(bodyParser.json())
 app.use(cookieParser())
 
-const User = require('./models/user');
+const User = require('./models/user')
+const auth = require('./middleware/auth')
 
 const url = "mongodb+srv://tlatamus0203:3PV3ZAuEL6MrXkfr@cluster23.cyyuqox.mongodb.net/?retryWrites=true&w=majority&appName=Cluster23"
 
@@ -63,6 +64,7 @@ app.post("/api/user/login", async (req, res) => {
     }
 
     await user.generateToken()
+    console.log(user.token)
     res
       .cookie("x_auth", user.token)
       .status(200)
@@ -75,6 +77,56 @@ app.post("/api/user/login", async (req, res) => {
     })
   }
 })
+
+app.get("/api/user/logout", auth, async (req, res) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { _id: req.user._id },
+      { token: "" },
+      { new: true }
+    )
+    if (!user) {
+      return res.status(404).json({ success: false, message: "사용자를 찾을 수 없습니다." })
+    }
+    return res.status(200).json({ success: true })
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message })
+  }
+})
+
+app.get("/api/user/auth", auth, (req, res) => {
+  const {
+    _id,
+    id,
+    name,
+    img,
+    gold,
+    score,
+    character_own,
+    character_now,
+    records,
+    wins,
+    losses,
+    google_id
+  } = req.user
+
+  res.status(200).json({
+    _id,
+    id,
+    name,
+    img,
+    gold,
+    score,
+    character_own,
+    character_now,
+    records,
+    wins,
+    losses,
+    google_id,
+    isAuth: true
+  })
+})
+
 
 app.listen(port, () => {
   console.log(`listening on port ${port}`)

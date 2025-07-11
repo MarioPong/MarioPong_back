@@ -116,7 +116,7 @@ const userSchema = new mongoose.Schema({
   tokenExp: {
     type: Number,
   },
-});
+})
 
 
 userSchema.pre("save", async function (next) {
@@ -143,6 +143,18 @@ userSchema.methods.generateToken = async function () {
     return user
   } catch (err) {
     throw err
+  }
+}
+
+userSchema.statics.findByToken = async function(token) {
+  try {
+    const decoded = jwt.verify(token, "secretToken")
+    if (!decoded || !decoded._id) {
+      return null
+    }
+    return await this.findOne({ _id: decoded._id, token })
+  } catch (err) {
+    return null
   }
 }
 
