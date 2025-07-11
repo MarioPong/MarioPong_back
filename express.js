@@ -10,7 +10,7 @@ const host = '0.0.0.0'
 
 const allowedOrigins = [
   'http://127.0.0.1:5500',
-  'https://effulgent-smakager-fbd602.netlify.app'
+  'https://mario-pong.netlify.app'
 ];
 
 app.use(cors({
