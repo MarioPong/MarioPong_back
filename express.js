@@ -107,26 +107,27 @@ app.post("/api/user/login", async (req, res) => {
 })
 
 app.post('/api/user/forgot-password', async (req, res) => {
-  const { email } = req.body;
+  const { email } = req.body
   if (!email) {
-    return res.status(400).json({ success: false, message: '이메일을 입력하세요.' });
+    return res.status(400).json({ success: false, message: '이메일을 입력하세요.' })
   }
 
   try {
-    const user = await User.findOne({ id: email });
+    const user = await User.findOne({ id: email })
     if (!user) {
-      return res.status(404).json({ success: false, message: '등록된 이메일이 없습니다.' });
+      return res.status(404).json({ success: false, message: '등록된 이메일이 없습니다.' })
     }
 
-    const tempPassword = Math.random().toString(36).slice(-8);
+    const tempPassword = Math.random().toString(36).slice(-8)
 
-    user.password = await bcrypt.hash(tempPassword, saltRounds);
-    await user.save();
+    const originalPassword = user.password
+    user.password = await bcrypt.hash(tempPassword, saltRounds)
+    await user.save()
 
     const transporter = nodemailer.createTransport({
-      service: 'Gmail',
+      service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER, // 환경변수로 관리
+        user: process.env.EMAIL_USER, 
         pass: process.env.EMAIL_PASS
       }
     })
@@ -138,9 +139,11 @@ app.post('/api/user/forgot-password', async (req, res) => {
       text: `안녕하세요!\n\n임시 비밀번호는 ${tempPassword} 입니다.\n로그인 후 반드시 비밀번호를 변경해 주세요.`
     }
 
-    transporter.sendMail(mailOptions, (error, info) => {
+    transporter.sendMail(mailOptions, async (error, info) => {
       if (error) {
         console.error(error)
+        user.password = originalPassword
+        await user.save()
         return res.status(500).json({ success: false, message: '이메일 전송에 실패했습니다.' })
       }
       return res.status(200).json({ success: true, message: '임시 비밀번호가 이메일로 전송되었습니다.' })
@@ -148,6 +151,8 @@ app.post('/api/user/forgot-password', async (req, res) => {
 
   } catch (err) {
     console.error(err)
+    user.password = originalPassword
+    await user.save()
     return res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' })
   }
 })
