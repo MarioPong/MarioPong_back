@@ -64,7 +64,6 @@ app.post("/api/user/login", async (req, res) => {
     }
 
     await user.generateToken()
-    console.log(user.token)
     res
       .cookie("x_auth", user.token)
       .status(200)

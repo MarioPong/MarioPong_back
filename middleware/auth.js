@@ -3,7 +3,6 @@ const User = require("../models/user")
 const auth = async (req, res, next) => {
   try {
     const token = req.cookies.x_auth
-    console.log(token)
     if (!token) {
       return res.status(401).json({ isAuth: false, error: "토큰이 없습니다." })
     }

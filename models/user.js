@@ -149,10 +149,10 @@ userSchema.methods.generateToken = async function () {
 userSchema.statics.findByToken = async function(token) {
   try {
     const decoded = jwt.verify(token, "secretToken")
-    if (!decoded || !decoded._id) {
+    if (!decoded ) {
       return null
     }
-    return await this.findOne({ _id: decoded._id, token })
+    return await this.findOne({ _id: decoded, token })
   } catch (err) {
     return null
   }
