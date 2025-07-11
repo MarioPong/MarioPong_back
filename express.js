@@ -36,6 +36,46 @@ app.post("/api/user/register", async (req, res) => {
   }
 })
 
+app.post("/api/user/login", async (req, res) => {
+  try {
+    const { id, password } = req.body
+    if (!id || !password) {
+      return res.status(400).json({
+        loginSuccess: false,
+        message: "아이디와 비밀번호를 모두 입력하세요.",
+      })
+    }
+
+    const user = await User.findOne({ id });
+    if (!user) {
+      return res.status(401).json({
+        loginSuccess: false,
+        message: "아이디 또는 비밀번호가 올바르지 않습니다.",
+      })
+    }
+
+    const isMatch = await user.comparePassword(password)
+    if (!isMatch) {
+      return res.status(401).json({
+        loginSuccess: false,
+        message: "아이디 또는 비밀번호가 올바르지 않습니다.",
+      })
+    }
+
+    await user.generateToken()
+    res
+      .cookie("x_auth", user.token)
+      .status(200)
+      .json({ loginSuccess: true, userId: user._id })
+  } catch (err) {
+    res.status(500).json({
+      loginSuccess: false,
+      message: "서버 오류가 발생했습니다.",
+      error: err.message,
+    })
+  }
+})
+
 app.listen(port, () => {
   console.log(`listening on port ${port}`)
 })
