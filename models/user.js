@@ -8,7 +8,6 @@ const characterSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
-    unique: true
   },
   img: {
     type: String,
@@ -159,7 +158,6 @@ userSchema.statics.findByToken = async function(token) {
 }
 
 userSchema.statics.isEmailDuplicated = async function(id) {
-  console.log(id)
   const user = await this.findOne({ id })
   return !!user
 }
