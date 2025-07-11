@@ -4,61 +4,6 @@ const jwt = require("jsonwebtoken")
 
 const saltRounds = 10
 
-const characterSchema = new mongoose.Schema({
-  id: {
-    type: String,
-    required: true,
-  },
-  img: {
-    type: String,
-    required: true
-  },
-  skill: {
-    type: String,
-    required: true 
-  },
-  price: {
-    type: Number,
-    required: true 
-  },
-  lvl: {
-    type: Number,
-    default: 1 
-  }
-});
-
-const gameSchema = new mongoose.Schema({
-  id: {
-    type: String,
-    required: true,
-    unique: true 
-  },
-  p1: {
-    type: String,
-    required: true 
-  },
-  p2: {
-    type: String,
-    required: true 
-  },
-  win: {
-    type: String,
-    required: true 
-  },
-  lose: {
-    type: String,
-    required: true 
-  },
-  score: {
-    type: Number,
-    required: true,
-  },
-  date: {
-    type: Date,
-    default: Date.now
-  }
-});
-
 const userSchema = new mongoose.Schema({
   id: {
     type: String,
@@ -86,15 +31,15 @@ const userSchema = new mongoose.Schema({
     default: 0
   },
   character_own: {
-    type: [characterSchema],
+    type: [String],
     default: []
   },
   character_now: {
-    type: characterSchema, 
+    type: String, 
     default: null
   },
   records: {
-    type: [gameSchema], 
+    type: [String],
     default: []
   },
   wins: {

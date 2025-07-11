@@ -25,7 +25,7 @@ mongoose.connect(url)
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error(err))
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
   res.send('Server On')
 })
 
