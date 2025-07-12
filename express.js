@@ -237,7 +237,7 @@ const httpServer = app.listen(port, () => {
 
 const io = new Server(httpServer, {
   cors : {
-    origin: "*",
+    origin: "https://mario-pong.netlify.app",
     methods: ["GET", "POST"],
   }
 })
