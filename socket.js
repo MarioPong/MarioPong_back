@@ -1,4 +1,4 @@
-// socket.js
+// socket.js (가로 전체화면, 좌우 패들 구조)
 const roomReadyStatus = {};
 const gameStates = {};
 const gameIntervals = {};
@@ -17,47 +17,55 @@ function listen(io) {
     if (!state) return;
 
     // 공 이동
-    state.ballY += state.speedY * state.ballDirection;
     state.ballX += state.speedX;
+    state.ballY += state.speedY;
 
-    // 벽 충돌
-    if (state.ballX < 0 && state.speedX < 0) state.speedX = -state.speedX;
-    if (state.ballX > state.width && state.speedX > 0) state.speedX = -state.speedX;
+    // 위/아래 벽 충돌 (반사)
+    if (state.ballY < 0 && state.speedY < 0) state.speedY = -state.speedY;
+    if (state.ballY > state.height && state.speedY > 0) state.speedY = -state.speedY;
 
-    // 바닥 패들 충돌
-    if (state.ballY > state.height - state.paddleDiff) {
-      if (state.ballX >= state.paddleX[0] && state.ballX <= state.paddleX[0] + state.paddleWidth) {
-        state.speedY = Math.min(state.speedY + 1, 5);
-        state.ballDirection = -state.ballDirection;
-        state.trajectoryX[0] = state.ballX - (state.paddleX[0] + state.paddleDiff);
-        state.speedX = state.trajectoryX[0] * 0.3;
-      } else {
-        // 득점
-        state.score[1]++;
-        ballReset(state);
-      }
+    // 왼쪽 패들(플레이어 0) 충돌
+    if (
+      state.ballX < state.paddleX[0] + state.paddleWidth &&
+      state.ballY + state.ballRadius > state.paddleY[0] &&
+      state.ballY - state.ballRadius < state.paddleY[0] + state.paddleHeight &&
+      state.speedX < 0
+    ) {
+      state.speedX = -state.speedX;
+      // 각도 조절
+      const hitPoint = (state.ballY - (state.paddleY[0] + state.paddleHeight / 2)) / (state.paddleHeight / 2);
+      state.speedY = hitPoint * 5;
     }
-    // 천장 패들 충돌
-    if (state.ballY < state.paddleDiff) {
-      if (state.ballX >= state.paddleX[1] && state.ballX <= state.paddleX[1] + state.paddleWidth) {
-        state.speedY = Math.min(state.speedY + 1, 5);
-        state.ballDirection = -state.ballDirection;
-        state.trajectoryX[1] = state.ballX - (state.paddleX[1] + state.paddleDiff);
-        state.speedX = state.trajectoryX[1] * 0.3;
-      } else {
-        state.score[0]++;
-        ballReset(state);
-      }
+    // 오른쪽 패들(플레이어 1) 충돌
+    if (
+      state.ballX > state.paddleX[1] &&
+      state.ballY + state.ballRadius > state.paddleY[1] &&
+      state.ballY - state.ballRadius < state.paddleY[1] + state.paddleHeight &&
+      state.speedX > 0
+    ) {
+      state.speedX = -state.speedX;
+      const hitPoint = (state.ballY - (state.paddleY[1] + state.paddleHeight / 2)) / (state.paddleHeight / 2);
+      state.speedY = hitPoint * 5;
+    }
+
+    // 득점 (좌우 벽)
+    if (state.ballX < 0) {
+      state.score[1]++;
+      ballReset(state, 1);
+    }
+    if (state.ballX > state.width) {
+      state.score[0]++;
+      ballReset(state, 0);
     }
   }
 
-  // 공 리셋
-  function ballReset(state) {
+  // 공 리셋 (득점 후)
+  function ballReset(state, scorer) {
     state.ballX = state.width / 2;
     state.ballY = state.height / 2;
-    state.speedY = 3;
-    state.speedX = 0;
-    state.ballDirection = 1;
+    state.ballRadius = 10;
+    state.speedX = scorer === 0 ? 5 : -5; // 득점한 방향으로 공 발사
+    state.speedY = 0;
   }
 
   pongNamespace.on('connection', (socket) => {
@@ -79,19 +87,17 @@ function listen(io) {
 
       if (!gameStates[room]) {
         gameStates[room] = {
-          width: 500,
-          height: 700,
-          paddleX: [225, 225],
-          paddleWidth: 50,
-          paddleHeight: 10,
-          paddleDiff: 25,
-          trajectoryX: [0, 0],
-          ballX: 250,
-          ballY: 350,
-          ballRadius: 5,
-          ballDirection: 1,
-          speedY: 2,
-          speedX: 0,
+          width: 700,
+          height: 500,
+          paddleX: [20, 670], // 왼쪽, 오른쪽 패들 X좌표 (여유를 두고)
+          paddleY: [225, 225], // 두 패들의 Y좌표
+          paddleWidth: 10,
+          paddleHeight: 75,
+          ballX: 350,
+          ballY: 250,
+          ballRadius: 10,
+          speedX: 5,
+          speedY: 0,
           score: [0, 0]
         };
       }
@@ -143,13 +149,13 @@ function listen(io) {
       socket.emit('paddleIndex', idx);
     });
 
-    // 패들 이동 입력
+    // 패들 이동 입력 (Y축)
     socket.on('paddleMove', (data) => {
       if (!room || !gameStates[room]) return;
       const idx = getPlayerIndex(room, socket.id);
       if (idx === 0 || idx === 1) {
         // 패들이 캔버스를 넘지 않게
-        gameStates[room].paddleX[idx] = Math.max(0, Math.min(data.xPosition, gameStates[room].width - gameStates[room].paddleWidth));
+        gameStates[room].paddleY[idx] = Math.max(0, Math.min(data.yPosition, gameStates[room].height - gameStates[room].paddleHeight));
       }
     });
 
