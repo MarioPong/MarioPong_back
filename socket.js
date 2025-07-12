@@ -57,6 +57,16 @@ function listen(io) {
       state.score[0]++;
       ballReset(state, 0);
     }
+
+    // 10점 도달 시 게임종료
+    if (state.score[0] >= 10 || state.score[1] >= 10) {
+      clearInterval(gameIntervals[room]);
+      delete gameIntervals[room];
+      pongNamespace.in(room).emit('gameOver', {
+        winner: state.score[0] > state.score[1] ? 0 : 1,
+        score: state.score
+      });
+    }
   }
 
   // 공 리셋 (득점 후)
