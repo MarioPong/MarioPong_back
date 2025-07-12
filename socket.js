@@ -149,12 +149,10 @@ function listen(io) {
       socket.emit('paddleIndex', idx);
     });
 
-    // 패들 이동 입력 (Y축)
     socket.on('paddleMove', (data) => {
       if (!room || !gameStates[room]) return;
       const idx = getPlayerIndex(room, socket.id);
       if (idx === 0 || idx === 1) {
-        // 패들이 캔버스를 넘지 않게
         gameStates[room].paddleY[idx] = Math.max(0, Math.min(data.yPosition, gameStates[room].height - gameStates[room].paddleHeight));
       }
     });
