@@ -1,10 +1,11 @@
 const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
+const webSocket = require('./socket')
+const {Server} = require('socket.io')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const nodemailer = require('nodemailer')
-const bcrypt = require('bcrypt')
 require('dotenv').config()
 
 const app = express()
@@ -230,6 +231,15 @@ app.get("/api/user/auth", auth, (req, res) => {
 })
 
 
-app.listen(port, () => {
+const httpServer = app.listen(port, () => {
   console.log(`listening on port ${port}`)
 })
+
+const io = new Server(httpServer, {
+  cors : {
+    origin: "*",
+    methods: ["GET", "POST"],
+  }
+})
+
+webSocket.listen(io)
