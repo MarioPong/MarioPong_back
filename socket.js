@@ -6,7 +6,6 @@ const gameIntervals = {};
 function listen(io) {
   const pongNamespace = io.of('/pong');
 
-  // 유틸: 방 내 소켓ID 배열에서 내 인덱스 구하기
   function getPlayerIndex(room, socketId) {
     const sockets = Array.from(pongNamespace.adapter.rooms.get(room) || []);
     return sockets.indexOf(socketId);
@@ -133,7 +132,7 @@ function listen(io) {
             }, 1000 / 60); // 60 FPS
           }
         } else {
-          pongNamespace.in(room).emit('waiting', { message: '상대방을 기다리는 중...' });
+          pongNamespace.in(room).emit('waiting', { id: socket.id });
         }
       }
     });
