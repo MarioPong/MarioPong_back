@@ -116,6 +116,7 @@ function listen(io) {
         if (gameIntervals[currentRoom]) {
           clearInterval(gameIntervals[currentRoom]);
           delete gameIntervals[currentRoom];
+          pongNamespace.in(room).emit('componentLeft', { id: socket.id });
         }
         delete gameStates[currentRoom];
       }
