@@ -40,6 +40,14 @@ function listen(io) {
       }
     })
 
+    socket.on('componentLeft', () => {
+      if (room && roomReadyStatus[room]) {
+        roomReadyStatus[room][socket.id] = false
+        console.log('Component left', socket.id, room)
+        pongNamespace.in(room).emit('leftWhenReady')
+      }
+    })
+
     socket.on('paddleMove', (paddleData) => {
       socket.to(room).emit('paddleMove', paddleData)
     })
