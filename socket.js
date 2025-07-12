@@ -23,6 +23,7 @@ function listen(io) {
       roomReadyStatus[room][socket.id] = false
 
       console.log(`User ${socket.id} joined room ${room}`)
+      socket.emit('enteredRoom', {message : '방에 입장했습니다'})
     })
 
     socket.on('ready', () => {
