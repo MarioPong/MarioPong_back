@@ -239,6 +239,7 @@ const io = new Server(httpServer, {
   cors : {
     origin: "https://mario-pong.netlify.app",
     methods: ["GET", "POST"],
+    credentials: true
   }
 })
 

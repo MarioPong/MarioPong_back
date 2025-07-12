@@ -56,8 +56,7 @@ function listen(io) {
       }
     })
 
-    socket.on('leaveRoom', (roomData) => {
-      ({currentRoom, socketId} = roomData);
+    socket.on('leaveRoom', (currentRoom) => {
       console.log(`Client ${socketId} left`);
       delete roomReadyStatus[currentRoom][socket.id];
       if (Object.keys(roomReadyStatus[currentRoom]).length === 0) {
