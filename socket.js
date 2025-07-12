@@ -30,12 +30,20 @@ function listen(io) {
       if (room && roomReadyStatus[room]) {
         roomReadyStatus[room][socket.id] = true
         console.log('Player ready', socket.id, room)
+        pongNamespace.in(room).emit('checkReady')
+      }
+    })
 
+    socket.on('checkReady', () => {
+      if (room && roomReadyStatus[room]) {
         const allReady = Object.values(roomReadyStatus[room]).length >= 2 &&
                         Object.values(roomReadyStatus[room]).every(status => status)
 
         if (allReady) {
           pongNamespace.in(room).emit('startGame')
+        }
+        else {
+          pongNamespace.in(room).emit('notReady')
         }
       }
     })
@@ -46,6 +54,19 @@ function listen(io) {
         console.log('Component left', socket.id, currentRoom)
         pongNamespace.in(currentRoom).emit('leftWhenReady')
       }
+    })
+
+    socket.on('leaveRoom', (roomData) => {
+      ({currentRoom, socketId} = roomData);
+      console.log(`Client ${socketId} left`);
+      delete roomReadyStatus[currentRoom][socket.id];
+      if (Object.keys(roomReadyStatus[currentRoom]).length === 0) {
+        delete roomReadyStatus[currentRoom];
+      }
+      pongNamespace.in(room).emit('checkReady')
+      pongNamespace.in(currentRoom).emit('leftWhenReady')
+    
+      socket.leave(room)
     })
 
     socket.on('paddleMove', (paddleData) => {
