@@ -174,6 +174,14 @@ function listen(io) {
       }
     });
 
+    socket.on('selectCharacter', (character) => {
+      if (room && roomPlayers[room]) {
+        const player = roomPlayers[room].find(p => p.id === socket.id);
+        if (player) player.character = character;
+        pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
+      }
+    });
+
     // 내 패들 인덱스 요청 처리
     socket.on('getPaddleIndex', (roomName) => {
       const idx = getPlayerIndex(roomName, socket.id);
