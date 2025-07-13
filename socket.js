@@ -92,9 +92,6 @@ function listen(io) {
       room = roomName;
       socket.join(room);
 
-      if (!roomPlayers[room]) roomPlayers[room] = [];
-      roomPlayers[room].push({ id: socket.id, userName, ready: false });
-
       // 준비상태 및 게임상태 초기화
       if (!roomReadyStatus[room]) roomReadyStatus[room] = {};
       roomReadyStatus[room][socket.id] = false;
@@ -103,8 +100,8 @@ function listen(io) {
         gameStates[room] = {
           width: 700,
           height: 500,
-          paddleX: [20, 670], // 왼쪽, 오른쪽 패들 X좌표 (여유를 두고)
-          paddleY: [225, 225], // 두 패들의 Y좌표
+          paddleX: [20, 670], 
+          paddleY: [225, 225], 
           paddleWidth: 10,
           paddleHeight: 75,
           ballX: 350,
@@ -112,9 +109,22 @@ function listen(io) {
           ballRadius: 10,
           speedX: 5,
           speedY: 0,
-          score: [0, 0]
+          score: [0, 0],
+          p1: "",
+          p2: "",
+          p1_character: "",
+          p2_character: ""
         };
       }
+
+      if (!roomPlayers[room]) {
+        roomPlayers[room] = [];
+        gameStates[room].p1 = userName;
+      }
+      else{
+        gameStates[room].p2 = userName;
+      }
+      roomPlayers[room].push({ id: socket.id, userName, ready: false });
 
       const index = getPlayerIndex(room, socket.id)
       socket.emit('enteredRoom', index);
@@ -147,10 +157,13 @@ function listen(io) {
       socket.leave(currentRoom);
     });
 
-    socket.on('ready', () => {
+    socket.on('ready', (character) => {
       if (room && roomPlayers[room]) {
         const player = roomPlayers[room].find(p => p.id === socket.id);
-        if (player) player.ready = true;
+        if (player){
+          player.ready = true;
+          player.character = character;
+        }
         pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
       }
       
@@ -160,6 +173,8 @@ function listen(io) {
           Object.values(roomReadyStatus[room]).length === 2 &&
           Object.values(roomReadyStatus[room]).every(status => status);
         if (allReady) {
+          gameStates[room].p1_character = roomPlayers[room][0].character;
+          gameStates[room].p2_character = roomPlayers[room][1].character;
           pongNamespace.in(room).emit('startGame');
           // 게임 루프 시작
           if (!gameIntervals[room]) {
