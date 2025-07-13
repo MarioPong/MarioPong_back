@@ -35,6 +35,7 @@ app.use(bodyParser.json())
 app.use(cookieParser())
 
 const User = require('./models/user')
+const Character = require('./models/character')
 const auth = require('./middleware/auth')
 
 const url = process.env.MONGODB_URL
@@ -97,7 +98,7 @@ app.post("/api/user/login", async (req, res) => {
         secure: true
       })
       .status(200)
-      .json({ loginSuccess: true, userId: user._id })
+      .json({ loginSuccess: true, userId: user.id, username: user.name, gold: user.gold, score: user.score, characters: user.character_own })
   } catch (err) {
     res.status(500).json({
       loginSuccess: false,
@@ -228,6 +229,17 @@ app.get("/api/user/auth", auth, (req, res) => {
     google_id,
     isAuth: true
   })
+})
+
+app.post("/api/character/register", async (req, res) => {
+  try {
+    const character = new Character(req.body)
+    await character.save()
+    console.log(character)
+    res.status(200).json({ success: true })
+  } catch (err) {
+    res.json({ success: false, err })
+  }
 })
 
 

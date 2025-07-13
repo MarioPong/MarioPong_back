@@ -6,10 +6,6 @@ const characterSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  img: {
-    type: String,
-    required: true
-  },
   skill: {
     type: String,
     required: true 
