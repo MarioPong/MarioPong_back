@@ -2,6 +2,7 @@
 const roomReadyStatus = {};
 const gameStates = {};
 const gameIntervals = {};
+const roomPlayers = {};
 
 function listen(io) {
   const pongNamespace = io.of('/pong');
@@ -81,7 +82,7 @@ function listen(io) {
   pongNamespace.on('connection', (socket) => {
     let room = null;
 
-    socket.on('joinRoom', (roomName) => {
+    socket.on('joinRoom', (roomName, userName) => {
       const clients = pongNamespace.adapter.rooms.get(roomName);
       const numClients = clients ? clients.size : 0;
       if (numClients >= 2) {
@@ -90,6 +91,9 @@ function listen(io) {
       }
       room = roomName;
       socket.join(room);
+
+      if (!roomPlayers[room]) roomPlayers[room] = [];
+      roomPlayers[room].push({ id: socket.id, userName, ready: false });
 
       // 준비상태 및 게임상태 초기화
       if (!roomReadyStatus[room]) roomReadyStatus[room] = {};
@@ -112,16 +116,26 @@ function listen(io) {
         };
       }
 
-      socket.emit('enteredRoom');
+      const index = getPlayerIndex(room, socket.id)
+      socket.emit('enteredRoom', index);
+
+      pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
     });
 
     socket.on('leaveRoom', (currentRoom) => {
+      if (currentRoom && roomPlayers[currentRoom]) {
+        roomPlayers[currentRoom] = roomPlayers[currentRoom].filter(p => p.id !== socket.id);
+        if (roomPlayers[currentRoom].length === 0) delete roomPlayers[currentRoom];
+        else pongNamespace.in(currentRoom).emit('roomInfo', roomPlayers[currentRoom]);
+      }
+
       if (currentRoom && roomReadyStatus[currentRoom]) {
         delete roomReadyStatus[currentRoom][socket.id];
         if (Object.keys(roomReadyStatus[currentRoom]).length === 0) {
           delete roomReadyStatus[currentRoom];
         }
       }
+
       if (currentRoom && gameStates[currentRoom]) {
         if (gameIntervals[currentRoom]) {
           clearInterval(gameIntervals[currentRoom]);
@@ -134,6 +148,12 @@ function listen(io) {
     });
 
     socket.on('ready', () => {
+      if (room && roomPlayers[room]) {
+        const player = roomPlayers[room].find(p => p.id === socket.id);
+        if (player) player.ready = true;
+        pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
+      }
+      
       if (room && roomReadyStatus[room]) {
         roomReadyStatus[room][socket.id] = true;
         const allReady =
@@ -169,10 +189,19 @@ function listen(io) {
     });
 
     socket.on('disconnect', () => {
+      if (room && roomPlayers[room]) {
+        roomPlayers[room] = roomPlayers[room].filter(p => p.id !== socket.id);
+        if (roomPlayers[room].length === 0) delete roomPlayers[room];
+        else pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
+      }
+      
       if (room && roomReadyStatus[room]) {
         delete roomReadyStatus[room][socket.id];
         if (Object.keys(roomReadyStatus[room]).length === 0) {
           delete roomReadyStatus[room];
+        }
+        else{
+          pongNamespace.in(room).emit('componentLeft', { id: socket.id });
         }
       }
       if (room && gameStates[room]) {
