@@ -175,6 +175,8 @@ function listen(io) {
         if (allReady) {
           gameStates[room].p1_character = roomPlayers[room][0].character;
           gameStates[room].p2_character = roomPlayers[room][1].character;
+          console.log(gameStates[room].p1_character)
+          console.log(gameStates[room].p2_character)
           pongNamespace.in(room).emit('startGame');
           // 게임 루프 시작
           if (!gameIntervals[room]) {
