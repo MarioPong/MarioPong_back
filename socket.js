@@ -46,6 +46,20 @@ function listen(io) {
       state.speedX < 0
     ) {
       state.speedX = -state.speedX;
+      //쿠파 스킬
+      if (state.pendingBallSpeedUp[0]){
+        state.pendingBallSpeedUp[0] = false;
+        const sx = state.speedX;
+        const sy = state.speedY;
+        state.speedX *=1.5;
+        state.speedY *=1.5;
+
+        if (state.ballSpeedUpTimeOut) clearTimeout(state.ballSpeedUpTimeOut);
+        state.ballSpeedUpTimeOut = setTimeout(() => {
+          state.speedX = sx;
+          state.speedY = sy;
+        }, 1500);
+      }
       // 각도 조절
       const hitPoint = (state.ballY - (state.paddleY[0] + state.paddleHeight[0] / 2)) / (state.paddleHeight[0] / 2);
       state.speedY = hitPoint * 5;
@@ -58,6 +72,21 @@ function listen(io) {
       state.speedX > 0
     ) {
       state.speedX = -state.speedX;
+
+      if (state.pendingBallSpeedUp[1]){
+        state.pendingBallSpeedUp[1] = false;
+        const sx = state.speedX;
+        const sy = state.speedY;
+        state.speedX *=1.5;
+        state.speedY *=1.5;
+
+        if (state.ballSpeedUpTimeOut) clearTimeout(state.ballSpeedUpTimeOut);
+        state.ballSpeedUpTimeOut = setTimeout(() => {
+          state.speedX = sx;
+          state.speedY = sy;
+        }, 1500);
+      }
+
       const hitPoint = (state.ballY - (state.paddleY[1] + state.paddleHeight[1] / 2)) / (state.paddleHeight[1] / 2);
       state.speedY = hitPoint * 5;
     }
@@ -128,6 +157,8 @@ function listen(io) {
           paddleWidth: [10, 10],       // 각 플레이어별 패들 너비
           paddleHeight: [75, 75],      // 각 플레이어별 패들 높이
           paddleSpeed: [8, 8],         // 각 플레이어별 패들 이동 속도
+          pendingBallSpeedUp: [false, false],
+          ballSpeedUpTimeOut: null,
           ballX: 350,
           ballY: 250,
           ballRadius: 10,
@@ -267,15 +298,10 @@ function listen(io) {
         }, 2000); // 2초간 유지
       } else if (player.character === 'Koopa') {
         // 공 속도 증가
-        const sx = gameStates[room].speedX;
-        const sy = gameStates[room].speedY;
-        gameStates[room].speedX = sx * 1.5;
-        gameStates[room].speedY = sy * 1.5;
-        setTimeout(() => {
-          // 스킬 효과 해제
-          gameStates[room].speedX = sx;
-          gameStates[room].speedY = sy;
-        }, 2000); // 2초간 유지
+        const idx = getPlayerIndex(room, socket.id);
+        if(idx === 0 || idx === 1){
+          gameStates[room].pendingBallSpeedUp[idx] = true;
+        }
       }
     });
 
