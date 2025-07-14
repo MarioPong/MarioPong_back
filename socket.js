@@ -67,6 +67,7 @@ function listen(io) {
         winner: state.score[0] > state.score[1] ? 0 : 1,
         score: state.score
       });
+      pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
     }
   }
 
@@ -124,7 +125,7 @@ function listen(io) {
       else{
         gameStates[room].p2 = userName;
       }
-      roomPlayers[room].push({ id: socket.id, userName, ready: false });
+      roomPlayers[room].push({ id: socket.id, userName, ready: false, character: "" });
 
       const index = getPlayerIndex(room, socket.id)
       socket.emit('enteredRoom', index);
