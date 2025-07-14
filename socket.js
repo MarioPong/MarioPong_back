@@ -236,15 +236,21 @@ function listen(io) {
         setTimeout(() => {
           // 스킬 효과 해제
           gameStates[room].paddleHeight[idx] = 75;
-        }, 5000); // 5초간 유지
+        }, 2000); // 2초간 유지
       }
-      // 추가 캐릭터 스킬 예시
       else if (player.character === 'Yoshi') {
         // 상대 패들 이동 속도 감소
         gameStates[room].paddleSpeed[1-idx] = 4;
         setTimeout(() => {
           gameStates[room].paddleSpeed[1-idx] = 8;
         }, 5000);
+      } else if (player.character === 'PrincessPeach') {
+        // 상대 패들 크기 감소
+        gameStates[room].paddleHeight[1-idx] = 75 * 0.5;
+        setTimeout(() => {
+          // 스킬 효과 해제
+          gameStates[room].paddleHeight[1-idx] = 75;
+        }, 2000); // 2초간 유지
       }
     });
 
