@@ -68,12 +68,12 @@ function listen(io) {
         score: state.score
       });
 
-      for(var isReady of roomReadyStatus[room]){
-        isReady=false;
+      for (const socketId in roomReadyStatus[room]) {
+        roomReadyStatus[room][socketId] = false;
       }
-      
-      for(var player of roomPlayers[room]){
-        player.ready = false;
+
+      for(const ready in roomPlayers[room]){
+        ready = false;
       }
       pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
     }
