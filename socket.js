@@ -34,9 +34,19 @@ function listen(io) {
     state.ballX += state.speedX;
     state.ballY += state.speedY;
 
+    for (const ball of state.fakeBalls){
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+    }
+
     // 위/아래 벽 충돌 (반사)
     if (state.ballY < 0 && state.speedY < 0) state.speedY = -state.speedY;
     if (state.ballY > state.height && state.speedY > 0) state.speedY = -state.speedY;
+
+    for (const ball of state.fakeBalls){
+      if (ball.y < 0 && ball.y < 0) ball.vy = -ball.vy;
+      if (ball.y > state.height && ball.vy > 0) ball.vy = -ball.vy;
+    }
 
     // 왼쪽 패들(플레이어 0) 충돌
     if (
@@ -83,6 +93,20 @@ function listen(io) {
       const hitPoint = (state.ballY - (state.paddleY[0] + state.paddleHeight[0] / 2)) / (state.paddleHeight[0] / 2);
       state.speedY = hitPoint * 5;
     }
+
+    for (const ball of state.fakeBalls){
+      if (
+        ball.x < state.paddleX[0] + state.paddleWidth[0] &&
+        ball.y + state.ballRadius > state.paddleY[0] &&
+        ball.y - state.ballRadius < state.paddleY[0] + state.paddleHeight[0] &&
+        ball.vx < 0
+      ) {
+        ball.vx = -ball.vx;
+        // 각도 조절
+        const hitPoint = (ball.y - (state.paddleY[0] + state.paddleHeight[0] / 2)) / (state.paddleHeight[0] / 2);
+        ball.vy = hitPoint * 5;
+      }
+    }  
     // 오른쪽 패들(플레이어 1) 충돌
     if (
       state.ballX > state.paddleX[1] &&
@@ -128,6 +152,20 @@ function listen(io) {
       state.speedY = hitPoint * 5;
     }
 
+    for (const ball of state.fakeBalls){
+      if (
+        ball.x > state.paddleX[1] &&
+        ball.y + state.ballRadius > state.paddleY[1] &&
+        ball.y - state.ballRadius < state.paddleY[1] + state.paddleHeight[1] &&
+        ball.vx > 0
+      ) {
+        ball.vx = -ball.vx;
+
+        const hitPoint = (ball.y - (state.paddleY[1] + state.paddleHeight[1] / 2)) / (state.paddleHeight[1] / 2);
+        ball.vy = hitPoint * 5;
+      }
+    }
+
     // 득점 (좌우 벽)
     if (state.ballX < 0) {
       state.score[1]++;
@@ -157,6 +195,7 @@ function listen(io) {
       }
     }
 
+    state.fakeBalls = state.fakeBalls.filter(ball => (ball.life > 0));
     for (const ball of state.fakeBalls){
       ball.life--;
       console.log(ball);
