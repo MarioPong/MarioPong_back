@@ -159,6 +159,7 @@ function listen(io) {
 
     for (const ball of state.fakeBalls){
       ball.life--;
+      console.log(ball);
     }
   }
 
