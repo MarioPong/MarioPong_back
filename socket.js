@@ -212,6 +212,18 @@ function listen(io) {
       }
     });
 
+    socket.on('useSkill', () => {
+      const player = roomPlayers[room].find(p => p.id === socket.id);
+      if (!player) return;
+      if (player.character === 'mario') {
+        gameStates[room].paddleHeight[player.index] = gameStates[room].paddleHeight[player.index] * 1.5;
+        setTimeout(() => {
+          gameStates[room].paddleHeight[player.index] = 원래값;
+        }, 5000); // 5초간 유지
+      }
+    });
+
+
     // 내 패들 인덱스 요청 처리
     socket.on('getPaddleIndex', (roomName) => {
       const idx = getPlayerIndex(roomName, socket.id);
