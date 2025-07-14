@@ -3,6 +3,7 @@ const roomReadyStatus = {};
 const gameStates = {};
 const gameIntervals = {};
 const roomPlayers = {};
+const ballSpeedUpTimeouts = {};
 
 function listen(io) {
   const pongNamespace = io.of('/pong');
@@ -54,10 +55,11 @@ function listen(io) {
         state.speedX *=1.5;
         state.speedY *=1.5;
 
-        if (state.ballSpeedUpTimeOut) clearTimeout(state.ballSpeedUpTimeOut);
-        state.ballSpeedUpTimeOut = setTimeout(() => {
+        if (ballSpeedUpTimeouts[room]) clearTimeout(ballSpeedUpTimeouts[room]);
+        ballSpeedUpTimeouts[room] = setTimeout(() => {
           state.speedX = sx;
           state.speedY = sy;
+          ballSpeedUpTimeouts[room] = null;
         }, 1500);
       }
       // 각도 조절
@@ -80,10 +82,11 @@ function listen(io) {
         state.speedX *=1.5;
         state.speedY *=1.5;
 
-        if (state.ballSpeedUpTimeOut) clearTimeout(state.ballSpeedUpTimeOut);
-        state.ballSpeedUpTimeOut = setTimeout(() => {
+        if (ballSpeedUpTimeouts[room]) clearTimeout(ballSpeedUpTimeouts[room]);
+        ballSpeedUpTimeouts[room] = setTimeout(() => {
           state.speedX = sx;
           state.speedY = sy;
+          ballSpeedUpTimeouts[room] = null;
         }, 1500);
       }
 
@@ -158,7 +161,6 @@ function listen(io) {
           paddleHeight: [75, 75],      // 각 플레이어별 패들 높이
           paddleSpeed: [8, 8],         // 각 플레이어별 패들 이동 속도
           pendingBallSpeedUp: [false, false],
-          ballSpeedUpTimeOut: null,
           ballX: 350,
           ballY: 250,
           ballRadius: 10,
@@ -170,6 +172,10 @@ function listen(io) {
           p1_character: "",
           p2_character: ""
         };
+      }
+
+      if(!ballSpeedUpTimeouts[room]){
+        ballSpeedUpTimeouts[room] = null;
       }
 
       if (!roomPlayers[room]) {
