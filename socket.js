@@ -17,6 +17,19 @@ function listen(io) {
     const state = gameStates[room];
     if (!state) return;
 
+    // 패들 이동
+    for (let i = 0; i < 2; i++) {
+      if (typeof state.targetPaddleY[i] === 'number') {
+        const diff = state.targetPaddleY[i] - state.paddleY[i];
+        const maxMove = state.paddleSpeed[i];
+        if (Math.abs(diff) <= maxMove) {
+          state.paddleY[i] = state.targetPaddleY[i];
+        } else {
+          state.paddleY[i] += diff > 0 ? maxMove : -maxMove;
+        }
+      }
+    }
+
     // 공 이동
     state.ballX += state.speedX;
     state.ballY += state.speedY;
@@ -111,6 +124,7 @@ function listen(io) {
           height: 500,
           paddleX: [20, 670], 
           paddleY: [225, 225], 
+          targetPaddleY: [225, 225],
           paddleWidth: [10, 10],       // 각 플레이어별 패들 너비
           paddleHeight: [75, 75],      // 각 플레이어별 패들 높이
           paddleSpeed: [8, 8],         // 각 플레이어별 패들 이동 속도
@@ -265,7 +279,7 @@ function listen(io) {
       const idx = getPlayerIndex(room, socket.id);
       if (idx === 0 || idx === 1) {
         // 패들 이동 제한: 패들 크기별로
-        gameStates[room].paddleY[idx] = Math.max(
+        gameStates[room].targetPaddleY[idx] = Math.max(
           0,
           Math.min(data.yPosition, gameStates[room].height - gameStates[room].paddleHeight[idx])
         );
