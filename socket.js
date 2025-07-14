@@ -50,15 +50,15 @@ function listen(io) {
       //쿠파 스킬
       if (state.pendingBallSpeedUp[0]){
         state.pendingBallSpeedUp[0] = false;
-        const sx = state.speedX;
-        const sy = state.speedY;
         state.speedX *=1.5;
         state.speedY *=1.5;
 
         if (ballSpeedUpTimeouts[room]) clearTimeout(ballSpeedUpTimeouts[room]);
         ballSpeedUpTimeouts[room] = setTimeout(() => {
-          state.speedX = sx;
-          state.speedY = sy;
+          const norm = Math.sqrt(state.speedX * state.speedX + state.speedY * state.speedY);
+          const base = 5;
+          state.speedX = (state.speedX / norm) * base;
+          state.speedY = (state.speedY / norm) * base;
           ballSpeedUpTimeouts[room] = null;
         }, 1500);
       }
@@ -77,15 +77,15 @@ function listen(io) {
 
       if (state.pendingBallSpeedUp[1]){
         state.pendingBallSpeedUp[1] = false;
-        const sx = state.speedX;
-        const sy = state.speedY;
         state.speedX *=1.5;
         state.speedY *=1.5;
 
         if (ballSpeedUpTimeouts[room]) clearTimeout(ballSpeedUpTimeouts[room]);
         ballSpeedUpTimeouts[room] = setTimeout(() => {
-          state.speedX = sx;
-          state.speedY = sy;
+          const norm = Math.sqrt(state.speedX * state.speedX + state.speedY * state.speedY);
+          const base = 5;
+          state.speedX = (state.speedX / norm) * base;
+          state.speedY = (state.speedY / norm) * base;
           ballSpeedUpTimeouts[room] = null;
         }, 1500);
       }
