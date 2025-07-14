@@ -215,7 +215,7 @@ function listen(io) {
     socket.on('useSkill', () => {
       const player = roomPlayers[room].find(p => p.id === socket.id);
       if (!player) return;
-      if (player.character === 'mario') {
+      if (player.character === 'Mario') {
         gameStates[room].paddleHeight[player.index] = gameStates[room].paddleHeight[player.index] * 1.5;
         setTimeout(() => {
           gameStates[room].paddleHeight[player.index] = 원래값;
