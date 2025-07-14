@@ -67,6 +67,14 @@ function listen(io) {
         winner: state.score[0] > state.score[1] ? 0 : 1,
         score: state.score
       });
+
+      for(var isReady of roomReadyStatus[room]){
+        isReady=false;
+      }
+      
+      for(var player of roomPlayers[room]){
+        player.ready = false;
+      }
       pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
     }
   }
