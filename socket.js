@@ -219,7 +219,7 @@ function listen(io) {
         console.log("Mario skill active!")
         gameStates[room].paddleHeight[player.index] = gameStates[room].paddleHeight[player.index] * 1.5;
         setTimeout(() => {
-          gameStates[room].paddleHeight[player.index] = 원래값;
+          gameStates[room].paddleHeight[player.index] = 75;
         }, 5000); // 5초간 유지
       }
     });
