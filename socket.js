@@ -134,6 +134,7 @@ function listen(io) {
     });
 
     socket.on('leaveRoom', (currentRoom) => {
+      socket.leave(currentRoom);
       if (currentRoom && roomPlayers[currentRoom]) {
         roomPlayers[currentRoom] = roomPlayers[currentRoom].filter(p => p.id !== socket.id);
         if (roomPlayers[currentRoom].length === 0) delete roomPlayers[currentRoom];
@@ -155,7 +156,6 @@ function listen(io) {
         }
         delete gameStates[currentRoom];
       }
-      socket.leave(currentRoom);
     });
 
     socket.on('ready', (character) => {
