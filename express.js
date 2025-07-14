@@ -17,8 +17,6 @@ const allowedOrigins = [
   'https://mario-pong.netlify.app'
 ]
 
-const saltRounds = 10
-
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {

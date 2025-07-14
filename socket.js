@@ -1,4 +1,4 @@
-// socket.js (가로 전체화면, 좌우 패들 구조)
+// socket.js (패들 속성 배열화, 스킬 확장 구조)
 const roomReadyStatus = {};
 const gameStates = {};
 const gameIntervals = {};
@@ -27,25 +27,25 @@ function listen(io) {
 
     // 왼쪽 패들(플레이어 0) 충돌
     if (
-      state.ballX < state.paddleX[0] + state.paddleWidth &&
+      state.ballX < state.paddleX[0] + state.paddleWidth[0] &&
       state.ballY + state.ballRadius > state.paddleY[0] &&
-      state.ballY - state.ballRadius < state.paddleY[0] + state.paddleHeight &&
+      state.ballY - state.ballRadius < state.paddleY[0] + state.paddleHeight[0] &&
       state.speedX < 0
     ) {
       state.speedX = -state.speedX;
       // 각도 조절
-      const hitPoint = (state.ballY - (state.paddleY[0] + state.paddleHeight / 2)) / (state.paddleHeight / 2);
+      const hitPoint = (state.ballY - (state.paddleY[0] + state.paddleHeight[0] / 2)) / (state.paddleHeight[0] / 2);
       state.speedY = hitPoint * 5;
     }
     // 오른쪽 패들(플레이어 1) 충돌
     if (
       state.ballX > state.paddleX[1] &&
       state.ballY + state.ballRadius > state.paddleY[1] &&
-      state.ballY - state.ballRadius < state.paddleY[1] + state.paddleHeight &&
+      state.ballY - state.ballRadius < state.paddleY[1] + state.paddleHeight[1] &&
       state.speedX > 0
     ) {
       state.speedX = -state.speedX;
-      const hitPoint = (state.ballY - (state.paddleY[1] + state.paddleHeight / 2)) / (state.paddleHeight / 2);
+      const hitPoint = (state.ballY - (state.paddleY[1] + state.paddleHeight[1] / 2)) / (state.paddleHeight[1] / 2);
       state.speedY = hitPoint * 5;
     }
 
@@ -69,12 +69,12 @@ function listen(io) {
         score: state.score
       });
 
+      // 준비 상태 초기화
       for (const socketId in roomReadyStatus[room]) {
         roomReadyStatus[room][socketId] = false;
       }
-
-      for(const ready in roomPlayers[room]){
-        ready = false;
+      for (const player of roomPlayers[room]) {
+        player.ready = false;
       }
     }
   }
@@ -111,8 +111,9 @@ function listen(io) {
           height: 500,
           paddleX: [20, 670], 
           paddleY: [225, 225], 
-          paddleWidth: 10,
-          paddleHeight: 75,
+          paddleWidth: [10, 10],       // 각 플레이어별 패들 너비
+          paddleHeight: [75, 75],      // 각 플레이어별 패들 높이
+          paddleSpeed: [8, 8],         // 각 플레이어별 패들 이동 속도
           ballX: 350,
           ballY: 250,
           ballRadius: 10,
@@ -129,8 +130,7 @@ function listen(io) {
       if (!roomPlayers[room]) {
         roomPlayers[room] = [];
         gameStates[room].p1 = userName;
-      }
-      else{
+      } else {
         gameStates[room].p2 = userName;
       }
       roomPlayers[room].push({ id: socket.id, userName, ready: false, character: "" });
@@ -182,10 +182,21 @@ function listen(io) {
           Object.values(roomReadyStatus[room]).length === 2 &&
           Object.values(roomReadyStatus[room]).every(status => status);
         if (allReady) {
+          // 각 플레이어 캐릭터 정보 저장
           gameStates[room].p1_character = roomPlayers[room][0].character;
           gameStates[room].p2_character = roomPlayers[room][1].character;
-          console.log(gameStates[room].p1_character)
-          console.log(gameStates[room].p2_character)
+          // 패들 상태 초기화
+          gameStates[room].paddleHeight = [75, 75];
+          gameStates[room].paddleWidth = [10, 10];
+          gameStates[room].paddleSpeed = [8, 8];
+          gameStates[room].paddleY = [225, 225];
+          // 점수/공 위치 등도 초기화
+          gameStates[room].score = [0, 0];
+          gameStates[room].ballX = 350;
+          gameStates[room].ballY = 250;
+          gameStates[room].speedX = 5;
+          gameStates[room].speedY = 0;
+
           pongNamespace.in(room).emit('startGame');
           // 게임 루프 시작
           if (!gameIntervals[room]) {
@@ -212,18 +223,30 @@ function listen(io) {
       }
     });
 
+    // 스킬 사용
     socket.on('useSkill', () => {
       const player = roomPlayers[room].find(p => p.id === socket.id);
       if (!player) return;
+      const idx = getPlayerIndex(room, socket.id);
+      if (idx !== 0 && idx !== 1) return;
+
       if (player.character === 'Mario') {
-        console.log("Mario skill active!")
-        gameStates[room].paddleHeight[player.index] = gameStates[room].paddleHeight[player.index] * 1.5;
+        // 패들 크기 증가
+        gameStates[room].paddleHeight[idx] = 75 * 1.5;
         setTimeout(() => {
-          gameStates[room].paddleHeight[player.index] = 75;
+          // 스킬 효과 해제
+          gameStates[room].paddleHeight[idx] = 75;
         }, 5000); // 5초간 유지
       }
+      // 추가 캐릭터 스킬 예시
+      else if (player.character === 'Yoshi') {
+        // 상대 패들 이동 속도 감소
+        gameStates[room].paddleSpeed[1-idx] = 4;
+        setTimeout(() => {
+          gameStates[room].paddleSpeed[1-idx] = 8;
+        }, 5000);
+      }
     });
-
 
     // 내 패들 인덱스 요청 처리
     socket.on('getPaddleIndex', (roomName) => {
@@ -235,7 +258,11 @@ function listen(io) {
       if (!room || !gameStates[room]) return;
       const idx = getPlayerIndex(room, socket.id);
       if (idx === 0 || idx === 1) {
-        gameStates[room].paddleY[idx] = Math.max(0, Math.min(data.yPosition, gameStates[room].height - gameStates[room].paddleHeight));
+        // 패들 이동 제한: 패들 크기별로
+        gameStates[room].paddleY[idx] = Math.max(
+          0,
+          Math.min(data.yPosition, gameStates[room].height - gameStates[room].paddleHeight[idx])
+        );
       }
     });
 
