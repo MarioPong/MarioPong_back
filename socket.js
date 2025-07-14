@@ -265,6 +265,17 @@ function listen(io) {
           // 스킬 효과 해제
           gameStates[room].paddleHeight[1-idx] = 75;
         }, 2000); // 2초간 유지
+      } else if (player.character === 'Koopa') {
+        // 공 속도 증가
+        const sx = gameStates[room].speedX;
+        const sy = gameStates[room].speedY;
+        gameStates[room].speedX = sx * 1.5;
+        gameStates[room].speedY = sy * 1.5;
+        setTimeout(() => {
+          // 스킬 효과 해제
+          gameStates[room].speedX = sx;
+          gameStates[room].speedY = sy;
+        }, 2000); // 2초간 유지
       }
     });
 
