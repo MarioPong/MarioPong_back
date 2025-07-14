@@ -76,7 +76,6 @@ function listen(io) {
       for(const ready in roomPlayers[room]){
         ready = false;
       }
-      pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
     }
   }
 
@@ -200,6 +199,10 @@ function listen(io) {
         }
       }
     });
+
+    socket.on('requestRoomInfo', () =>{
+      pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
+    })
 
     socket.on('selectCharacter', (character) => {
       if (room && roomPlayers[room]) {
