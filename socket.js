@@ -216,6 +216,7 @@ function listen(io) {
       const player = roomPlayers[room].find(p => p.id === socket.id);
       if (!player) return;
       if (player.character === 'Mario') {
+        console.log("Mario skill active!")
         gameStates[room].paddleHeight[player.index] = gameStates[room].paddleHeight[player.index] * 1.5;
         setTimeout(() => {
           gameStates[room].paddleHeight[player.index] = 원래값;
