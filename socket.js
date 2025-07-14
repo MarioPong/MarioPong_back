@@ -1,4 +1,3 @@
-// socket.js (패들 속성 배열화, 스킬 확장 구조)
 const roomReadyStatus = {};
 const gameStates = {};
 const gameIntervals = {};
@@ -62,6 +61,24 @@ function listen(io) {
           ballSpeedUpTimeouts[room] = null;
         }, 1500);
       }
+
+      //돈키콩 스킬
+      if (state.pendingFakeBalls[0]) {
+        state.pendingFakeBalls[0] = false;
+        const angle = Math.atan2(state.speedY, state.speedX);
+        const speed = Math.sprt(state.speedX * state.speedX + state.speedY * state.speedY);
+        for (let i =-1; i<=1; i++){
+          if(i===0) continue;
+          const fakeAngle = angle + i*0.25;
+          state.fakeBalls.push({
+            x: state.ballX,
+            y: state.ballY,
+            vx: Math.cos(fakeAngle) * speed,
+            vy: Math.sin(fakeAngle) * speed,
+            life: 80
+          });
+        }
+      }
       // 각도 조절
       const hitPoint = (state.ballY - (state.paddleY[0] + state.paddleHeight[0] / 2)) / (state.paddleHeight[0] / 2);
       state.speedY = hitPoint * 5;
@@ -88,6 +105,23 @@ function listen(io) {
           state.speedY = (state.speedY / norm) * base;
           ballSpeedUpTimeouts[room] = null;
         }, 1500);
+      }
+
+      if (state.pendingFakeBalls[1]) {
+        state.pendingFakeBalls[1] = false;
+        const angle = Math.atan2(state.speedY, state.speedX);
+        const speed = Math.sprt(state.speedX * state.speedX + state.speedY * state.speedY);
+        for (let i =-1; i<=1; i++){
+          if(i===0) continue;
+          const fakeAngle = angle + i*0.25;
+          state.fakeBalls.push({
+            x: state.ballX,
+            y: state.ballY,
+            vx: Math.cos(fakeAngle) * speed,
+            vy: Math.sin(fakeAngle) * speed,
+            life: 80
+          });
+        }
       }
 
       const hitPoint = (state.ballY - (state.paddleY[1] + state.paddleHeight[1] / 2)) / (state.paddleHeight[1] / 2);
@@ -122,6 +156,10 @@ function listen(io) {
         player.ready = false;
       }
     }
+
+    for (const ball of state.fakeBalls){
+      ball.life--;
+    }
   }
 
   // 공 리셋 (득점 후)
@@ -131,6 +169,7 @@ function listen(io) {
     state.ballRadius = 10;
     state.speedX = scorer === 0 ? 5 : -5; // 득점한 방향으로 공 발사
     state.speedY = 0;
+    state.fakeBalls = [];
   }
 
   pongNamespace.on('connection', (socket) => {
@@ -164,6 +203,8 @@ function listen(io) {
           ballX: 350,
           ballY: 250,
           ballRadius: 10,
+          fakeBalls: [],
+          pendingFakeBalls: [false, false],
           speedX: 5,
           speedY: 0,
           score: [0, 0],
@@ -316,6 +357,12 @@ function listen(io) {
           if (opponent) {
             pongNamespace.to(opponent.id).emit('blindEffect', { duration: 1000 });
           }
+        }
+      } else if (player.character === 'DonkeyKong') {
+        // 분신 공 던지기
+        const idx = getPlayerIndex(room, socket.id);
+        if(idx === 0 || idx === 1){
+          gameStates[room].pendingFakeBalls[idx] = true;
         }
       }
     });
