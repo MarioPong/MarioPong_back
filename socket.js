@@ -308,6 +308,15 @@ function listen(io) {
         if(idx === 0 || idx === 1){
           gameStates[room].pendingBallSpeedUp[idx] = true;
         }
+      } else if (player.character === 'Kinopio') {
+        // 화면 가리기
+        const idx = getPlayerIndex(room, socket.id);
+        if(idx === 0 || idx === 1){
+          const opponent = roomPlayers[room].find((p, i) => i !== idx);
+          if (opponent) {
+            pongNamespace.to(opponent.id).emit('blindEffect', { duration: 1000 });
+          }
+        }
       }
     });
 
