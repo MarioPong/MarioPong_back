@@ -110,7 +110,7 @@ function listen(io) {
       if (state.pendingFakeBalls[1]) {
         state.pendingFakeBalls[1] = false;
         const angle = Math.atan2(state.speedY, state.speedX);
-        const speed = Math.sprt(state.speedX * state.speedX + state.speedY * state.speedY);
+        const speed = Math.sqrt(state.speedX * state.speedX + state.speedY * state.speedY);
         for (let i =-1; i<=1; i++){
           if(i===0) continue;
           const fakeAngle = angle + i*0.25;
