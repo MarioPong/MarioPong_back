@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   },
   character_own: {
     type: [String],
-    default: [Mario]
+    default: ["Mario"]
   },
   character_now: {
     type: String, 
