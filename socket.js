@@ -85,7 +85,7 @@ function listen(io) {
             y: state.ballY,
             vx: Math.cos(fakeAngle) * speed,
             vy: Math.sin(fakeAngle) * speed,
-            life: 80
+            life: 120
           });
         }
       }
@@ -198,7 +198,6 @@ function listen(io) {
     state.fakeBalls = state.fakeBalls.filter(ball => (ball.life > 0));
     for (const ball of state.fakeBalls){
       ball.life--;
-      console.log(ball);
     }
   }
 
