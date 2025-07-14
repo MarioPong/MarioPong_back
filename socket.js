@@ -64,6 +64,11 @@ function listen(io) {
       clearInterval(gameIntervals[room]);
       delete gameIntervals[room];
 
+      pongNamespace.in(room).emit('gameOver', {
+        winner: state.score[0] > state.score[1] ? 0 : 1,
+        score: state.score
+      });
+
       for (const socketId in roomReadyStatus[room]) {
         roomReadyStatus[room][socketId] = false;
       }
@@ -72,11 +77,6 @@ function listen(io) {
         ready = false;
       }
       pongNamespace.in(room).emit('roomInfo', roomPlayers[room]);
-
-      pongNamespace.in(room).emit('gameOver', {
-        winner: state.score[0] > state.score[1] ? 0 : 1,
-        score: state.score
-      });
     }
   }
 
