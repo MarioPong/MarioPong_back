@@ -186,10 +186,10 @@ app.post('/api/user/update', async (req, res) => {
   if (!email) {
     return res.status(400).json({ success: false, message: '이메일을 입력하세요.' })
   }
-  if (!gold) {
+  if (gold === undefined || gold === null) {
     return res.status(400).json({ success: false, message: '골드를 입력하세요.' })
   }
-  if (!score) {
+  if (score === undefined || score === null) {
     return res.status(400).json({ success: false, message: '점수를 입력하세요.' })
   }
   if (!character_own) {
@@ -198,10 +198,10 @@ app.post('/api/user/update', async (req, res) => {
   if (!records) {
     return res.status(400).json({ success: false, message: '전적을 입력하세요.' })
   }
-  if (!wins) {
+  if (wins === undefined || wins === null) {
     return res.status(400).json({ success: false, message: '승리횟수를 입력하세요.' })
   }
-  if (!losses) {
+  if (losses === undefined || losses === null) {
     return res.status(400).json({ success: false, message: '패배횟수를 입력하세요.' })
   }
 
@@ -232,7 +232,7 @@ app.post('/api/user/update-gold', async (req, res) => {
   if (!email) {
     return res.status(400).json({ success: false, message: '이메일을 입력하세요.' })
   }
-  if (!gold) {
+  if (gold === undefined || gold === null) {
     return res.status(400).json({ success: false, message: '골드를 입력하세요.' })
   }
 
