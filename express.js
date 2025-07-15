@@ -31,6 +31,7 @@ app.use(cors({
 app.use(bodyParser.urlencoded({extended : true}))
 app.use(bodyParser.json())
 app.use(cookieParser())
+app.use(express.json())
 
 const User = require('./models/user')
 const Character = require('./models/character')
