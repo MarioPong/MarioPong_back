@@ -6,6 +6,8 @@ const {Server} = require('socket.io')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const nodemailer = require('nodemailer')
+const passport = require('passport')
+const GoogleStrategy = require('passport-google-oauth20').Strategy
 require('dotenv').config()
 
 const app = express()
@@ -72,17 +74,15 @@ app.get(
     try {
       const user = req.user
 
-      // JWT 발급 및 DB 저장
       const userWithToken = await user.generateToken()
 
-      // 쿠키에 토큰 저장 (또는 리디렉션 query로 전달 가능)
       res.cookie('token', userWithToken.token, {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24
       })
 
       // 로그인 성공 후 리디렉션
-      res.redirect(GOOGLE_REDIRECT_URL) // 프론트엔드 홈 페이지 경로
+      res.redirect(GOOGLE_REDIRECT_URL)
     } catch (err) {
       console.error('토큰 발급 중 오류:', err)
       res.redirect('/login?error=token')
