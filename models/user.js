@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema({
     default: null
   },
   records: {
-    type: [String],
+    type: [[Number]],
     default: []
   },
   wins: {
