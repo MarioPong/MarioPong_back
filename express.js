@@ -96,7 +96,7 @@ app.post("/api/user/login", async (req, res) => {
         secure: true
       })
       .status(200)
-      .json({ loginSuccess: true, userId: user.id, username: user.name, gold: user.gold, score: user.score, characters: user.character_own })
+      .json({ loginSuccess: true, userId: user.id, username: user.name, gold: user.gold, score: user.score, characters: user.character_own, records: user.records, wins: user.wins, losses: user.losses })
   } catch (err) {
     res.status(500).json({
       loginSuccess: false,
