@@ -175,6 +175,55 @@ app.post('/api/user/change-password', async (req, res) => {
   }
 })
 
+app.post('/api/user/update', async (req, res) => {
+  const email = req.body.id
+  const gold = req.body.gold
+  const score = req.body.score
+  const character_own = req.body.character_own
+  const records = req.body.records
+  const wins = req.body.wins
+  const losses = req.body.losses
+  if (!email) {
+    return res.status(400).json({ success: false, message: '이메일을 입력하세요.' })
+  }
+  if (!gold) {
+    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+  }
+  if (!score) {
+    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+  }
+  if (!character_own) {
+    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+  }
+  if (!records) {
+    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+  }
+  if (!wins) {
+    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+  }
+  if (!losses) {
+    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+  }
+
+  try {
+    const user = await User.findOne({ id: email })
+    if (!user) {
+      return res.status(404).json({ success: false, message: '등록된 이메일이 없습니다.' })
+    }
+
+    user.gold = gold
+    user.score = score
+    user.character_own = character_own
+    user.records = records
+    user.wins = wins
+    user.losses = losses
+    await user.save()
+    res.status(200).json({ success: true })
+  } catch (err) {
+    res.json({ success: false, err })
+  }
+})
+
 app.get("/api/user/logout", auth, async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
