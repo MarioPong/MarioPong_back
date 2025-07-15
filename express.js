@@ -246,6 +246,7 @@ app.post('/api/user/update/gold', async (req, res) => {
     console.log(user)
     res.status(200).json({ success: true })
   } catch (err) {
+    console.log(err)
     res.json({ success: false, err })
   }
 })
