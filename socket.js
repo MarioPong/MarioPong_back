@@ -76,7 +76,7 @@ function listen(io) {
       if (state.pendingFakeBalls[0]) {
         state.pendingFakeBalls[0] = false;
         const angle = Math.atan2(state.speedY, state.speedX);
-        const speed = Math.sprt(state.speedX * state.speedX + state.speedY * state.speedY);
+        const speed = Math.sqrt(state.speedX * state.speedX + state.speedY * state.speedY);
         for (let i =-1; i<=1; i++){
           if(i===0) continue;
           const fakeAngle = angle + i*0.25;
@@ -85,7 +85,7 @@ function listen(io) {
             y: state.ballY,
             vx: Math.cos(fakeAngle) * speed,
             vy: Math.sin(fakeAngle) * speed,
-            life: 120
+            life: 160
           });
         }
       }
@@ -143,7 +143,7 @@ function listen(io) {
             y: state.ballY,
             vx: Math.cos(fakeAngle) * speed,
             vy: Math.sin(fakeAngle) * speed,
-            life: 80
+            life: 160
           });
         }
       }

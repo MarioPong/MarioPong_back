@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
   },
   gold: {
     type: Number,
-    default: 0
+    default: 500
   },
   score: {
     type: Number,
