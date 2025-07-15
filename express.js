@@ -176,7 +176,7 @@ app.post('/api/user/change-password', async (req, res) => {
   }
 })
 
-app.post('/api/user/update', auth, async (req, res) => {
+app.post('/api/user/update', async (req, res) => {
   const email = req.body.id
   const gold = req.body.gold
   const score = req.body.score
