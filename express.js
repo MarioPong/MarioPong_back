@@ -225,6 +225,31 @@ app.post('/api/user/update', async (req, res) => {
   }
 })
 
+app.post('/api/user/update/gold', async (req, res) => {
+  const email = req.body.id
+  const gold = req.body.gold
+  if (!email) {
+    return res.status(400).json({ success: false, message: '이메일을 입력하세요.' })
+  }
+  if (!gold) {
+    return res.status(400).json({ success: false, message: '골드를 입력하세요.' })
+  }
+
+  try {
+    const user = await User.findOne({ id: email })
+    if (!user) {
+      return res.status(404).json({ success: false, message: '등록된 이메일이 없습니다.' })
+    }
+
+    user.gold = gold
+    await user.save()
+    console.log(user)
+    res.status(200).json({ success: true })
+  } catch (err) {
+    res.json({ success: false, err })
+  }
+})
+
 app.get("/api/user/logout", auth, async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
