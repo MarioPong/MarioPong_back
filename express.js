@@ -187,22 +187,22 @@ app.post('/api/user/update', async (req, res) => {
     return res.status(400).json({ success: false, message: '이메일을 입력하세요.' })
   }
   if (!gold) {
-    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+    return res.status(400).json({ success: false, message: '골드를 입력하세요.' })
   }
   if (!score) {
-    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+    return res.status(400).json({ success: false, message: '점수를 입력하세요.' })
   }
   if (!character_own) {
-    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+    return res.status(400).json({ success: false, message: '보유 캐릭터를 입력하세요.' })
   }
   if (!records) {
-    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+    return res.status(400).json({ success: false, message: '전적을 입력하세요.' })
   }
   if (!wins) {
-    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+    return res.status(400).json({ success: false, message: '승리횟수를 입력하세요.' })
   }
   if (!losses) {
-    return res.status(400).json({ success: false, message: '비밀번호를 입력하세요.' })
+    return res.status(400).json({ success: false, message: '패배횟수를 입력하세요.' })
   }
 
   try {
