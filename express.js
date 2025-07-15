@@ -74,6 +74,10 @@ app.post("/api/user/isduplicated", async (req, res) => {
   res.json({duplicated: isDuplicated})
 })
 
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+)
+
 app.get(
   '/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
