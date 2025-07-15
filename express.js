@@ -225,7 +225,7 @@ app.post('/api/user/update', async (req, res) => {
   }
 })
 
-app.put('/api/user/update-gold', async (req, res) => {
+app.put('/api/user/update-gold', auth, async (req, res) => {
   console.log("user gold update start")
   const email = req.body.id
   const gold = req.body.gold
