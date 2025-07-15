@@ -7,7 +7,7 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const nodemailer = require('nodemailer')
 const passport = require('passport')
-const GoogleStrategy = require('passport-google-oauth20').Strategy
+const session = require('express-session');
 require('dotenv').config()
 
 const app = express()
@@ -28,6 +28,13 @@ app.use(cors({
     }
   },
   credentials: true
+}));
+
+app.use(session({
+  secret: 'janmangjeonginyesdap', // 실제 서비스에서는 안전하게 관리
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true } // HTTPS 쓰면 true, 개발환경은 false
 }));
 
 app.use(bodyParser.urlencoded({extended : true}))
