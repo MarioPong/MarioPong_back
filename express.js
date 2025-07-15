@@ -218,6 +218,7 @@ app.post('/api/user/update', async (req, res) => {
     user.wins = wins
     user.losses = losses
     await user.save()
+    console.log(user)
     res.status(200).json({ success: true })
   } catch (err) {
     res.json({ success: false, err })
