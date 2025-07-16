@@ -44,6 +44,8 @@ app.use(express.json())
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.set('trust proxy', 1); 
+
 const User = require('./models/user')
 const Character = require('./models/character')
 const auth = require('./middleware/auth')
@@ -74,9 +76,15 @@ app.post("/api/user/isduplicated", async (req, res) => {
   res.json({duplicated: isDuplicated})
 })
 
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-)
+// app.get('/auth/google',
+//   passport.authenticate('google', { scope: ['profile', 'email'] })
+// )
+
+app.get('/auth/google', (req, res, next) => {
+  console.log('Redirecting to Google with callbackURL:', req.originalUrl);
+  next();
+}, passport.authenticate('google', { scope: ['profile', 'email'] }));
+
 
 app.get(
   '/auth/google/callback',

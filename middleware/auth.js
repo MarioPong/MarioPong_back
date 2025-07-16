@@ -52,7 +52,7 @@ async function registerOrLoginGoogleUser(profile) {
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "/auth/google/callback",
+  callbackURL: "https://mariopong-back-4cre.onrender.com/auth/google/callback",
 },
 async (accessToken, refreshToken, profile, done) => {
   try {
