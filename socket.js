@@ -12,6 +12,14 @@ function listen(io) {
     return sockets.indexOf(socketId);
   }
 
+  function speedUpBall(room) {
+    const state = gameStates[room];
+    if (!state) return;
+    // 적당한 속도 값(예: 1.05, 1.1 등)을 곱해서 조금씩 증가
+    state.speedX *= 1.05;
+    state.speedY *= 1.05;
+  }
+
   // 게임 상태 업데이트 (공 이동, 충돌, 점수 등)
   function updateGameState(room) {
     const state = gameStates[room];
@@ -181,6 +189,10 @@ function listen(io) {
       clearInterval(gameIntervals[room]);
       delete gameIntervals[room];
 
+      if (state.ballSpeedUpInterval) clearInterval(state.ballSpeedUpInterval);
+      state.ballSpeedUpInterval = null;
+
+
       pongNamespace.in(room).emit('gameOver', {
         winner: state.score[0] > state.score[1] ? 0 : 1,
         score: state.score
@@ -239,6 +251,7 @@ function listen(io) {
           paddleHeight: [75, 75],      // 각 플레이어별 패들 높이
           paddleSpeed: [8, 8],         // 각 플레이어별 패들 이동 속도
           pendingBallSpeedUp: [false, false],
+          ballSpeedUpInterval: null,
           ballX: 350,
           ballY: 250,
           ballRadius: 10,
@@ -274,6 +287,9 @@ function listen(io) {
 
     socket.on('leaveRoom', (currentRoom) => {
       socket.leave(currentRoom);
+      if (state.ballSpeedUpInterval) clearInterval(state.ballSpeedUpInterval);
+      state.ballSpeedUpInterval = null;
+      
       if (currentRoom && roomPlayers[currentRoom]) {
         roomPlayers[currentRoom] = roomPlayers[currentRoom].filter(p => p.id !== socket.id);
         if (roomPlayers[currentRoom].length === 0) delete roomPlayers[currentRoom];
@@ -335,6 +351,9 @@ function listen(io) {
               updateGameState(room);
               pongNamespace.in(room).emit('gameState', gameStates[room]);
             }, 1000 / 60); // 60 FPS
+            state.ballSpeedUpInterval = setInterval(() => {
+              speedUpBall(room);
+            }, 10000);
           }
         } else {
           pongNamespace.in(room).emit('waiting', { id: socket.id });

@@ -6,7 +6,7 @@ require('dotenv').config()
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.cookies.x_auth
+    const token = req.cookies.token
     if (!token) {
       return res.status(401).json({ isAuth: false, error: "토큰이 없습니다." })
     }
@@ -78,18 +78,18 @@ passport.deserializeUser(async (id, done) => {
 
 module.exports = auth
 module.exports = passport
-// module.exports = async function (req, res, next) {
-//   const token = req.cookies.token
-//   if (!token) return res.status(401).send('Access Denied')
+module.exports = async function (req, res, next) {
+  const token = req.cookies.token
+  if (!token) return res.status(401).json({ isAuth: false, error: "Access Denied" })
 
-//   try {
-//     const verified = jwt.verify(token, 'secretToken')
-//     const user = await User.findOne({ _id: verified, token })
-//     if (!user) return res.status(401).send('Unauthenticated')
+  try {
+    const verified = jwt.verify(token, 'secretToken')
+    const user = await User.findOne({ _id: verified, token })
+    if (!user) return res.status(401).json({ isAuth: false, error: "Unauthenticated" })
 
-//     req.user = user
-//     next()
-//   } catch (err) {
-//     return res.status(403).send('Invalid token')
-//   }
-// }
+    req.user = user
+    next()
+  } catch (err) {
+    return res.status(403).json({ isAuth: false, error: "Invalid Token" })
+  }
+}

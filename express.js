@@ -137,7 +137,7 @@ app.post("/api/user/login", async (req, res) => {
 
     await user.generateToken()
     res
-      .cookie("x_auth", user.token, {
+      .cookie("token", user.token, {
         httpOnly: true,
         sameSite: "none",
         secure: true
