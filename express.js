@@ -37,6 +37,8 @@ app.use(session({
   cookie: { secure: true } // HTTPS 쓰면 true, 개발환경은 false
 }));
 
+const { authMiddleware, passport } = require('./middleware/auth')
+
 app.use(bodyParser.urlencoded({extended : true}))
 app.use(bodyParser.json())
 app.use(cookieParser())
@@ -48,7 +50,7 @@ app.set('trust proxy', 1);
 
 const User = require('./models/user')
 const Character = require('./models/character')
-const { authMiddleware, passport } = require('./middleware/auth')
+
 
 const url = process.env.MONGODB_URL
 
