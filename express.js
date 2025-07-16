@@ -80,7 +80,7 @@ app.get('/auth/google',
 
 app.get(
   '/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', { failureRedirect: 'https://mario-pong.netlify.app/login.html' }),
   async (req, res) => {
     try {
       const user = req.user
@@ -96,7 +96,7 @@ app.get(
       res.redirect(GOOGLE_REDIRECT_URL)
     } catch (err) {
       console.error('토큰 발급 중 오류:', err)
-      res.redirect('/login?error=token')
+      res.redirect('https://mario-pong.netlify.app/login.html?error=token')
     }
   }
 )
