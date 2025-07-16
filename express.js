@@ -48,7 +48,7 @@ app.set('trust proxy', 1);
 
 const User = require('./models/user')
 const Character = require('./models/character')
-const auth = require('./middleware/auth')
+const { authMiddleware, passport } = require('./middleware/auth')
 
 const url = process.env.MONGODB_URL
 
@@ -75,10 +75,6 @@ app.post("/api/user/isduplicated", async (req, res) => {
   const isDuplicated = await User.isEmailDuplicated(req.body.id)
   res.json({duplicated: isDuplicated})
 })
-
-// app.get('/auth/google',
-//   passport.authenticate('google', { scope: ['profile', 'email'] })
-// )
 
 app.get('/auth/google', (req, res, next) => {
   console.log('Redirecting to Google with callbackURL:', req.originalUrl);
@@ -272,7 +268,7 @@ app.post('/api/user/update', async (req, res) => {
   }
 })
 
-app.put('/api/user/update-gold', auth, async (req, res) => {
+app.put('/api/user/update-gold', authMiddleware, async (req, res) => {
   console.log("user gold update start")
   const email = req.body.id
   const gold = req.body.gold
@@ -299,7 +295,7 @@ app.put('/api/user/update-gold', auth, async (req, res) => {
   }
 })
 
-app.get("/api/user/logout", auth, async (req, res) => {
+app.get("/api/user/logout", authMiddleware, async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
       { _id: req.user._id },
@@ -320,7 +316,7 @@ app.get("/api/user/logout", auth, async (req, res) => {
   }
 })
 
-app.get("/api/user/auth", auth, (req, res) => {
+app.get("/api/user/auth", authMiddleware, (req, res) => {
   const {
     _id,
     id,

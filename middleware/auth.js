@@ -1,103 +1,87 @@
-const User = require("../models/user")
-const passport = require('passport')
-const GoogleStrategy = require('passport-google-oauth20').Strategy
-const jwt = require('jsonwebtoken')
-require('dotenv').config()
+const User = require("../models/user");
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
-const auth = async (req, res, next) => {
-  try {
-    const token = req.cookies.token
-    if (!token) {
-      return res.status(401).json({ isAuth: false, error: "토큰이 없습니다." })
-    }
-
-    const user = await User.findByToken(token)
-    if (!user) {
-      return res.status(401).json({ isAuth: false, error: "인증된 유저가 아닙니다." })
-    }
-
-    req.token = token
-    req.user = user
-    next()
-  } catch (err) {
-    return res.status(500).json({ isAuth: false, error: "서버 오류" })
+const authMiddleware = async function (req, res, next) {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ isAuth: false, error: "Access Denied" });
   }
-}
+
+  try {
+    const decoded = jwt.verify(token, 'secretToken'); // 🔁 보안을 위해 process.env.JWT_SECRET 사용 권장
+    const user = await User.findOne({ _id: decoded._id, token });
+
+    if (!user) {
+      return res.status(401).json({ isAuth: false, error: "User not found or logged out" });
+    }
+
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(403).json({ isAuth: false, error: "Invalid Token" });
+  }
+};
+
 
 async function registerOrLoginGoogleUser(profile) {
-  const { id: google_id, displayName, emails, photos } = profile
-  const email = emails?.[0]?.value || null
+  const { id: google_id, displayName, emails } = profile;
+  const email = emails?.[0]?.value || null;
 
   try {
-    let user = await User.findOne({ google_id })
+    let user = await User.findOne({ google_id });
 
     if (!user) {
       user = new User({
         id: email,
-        password: Math.random().toString(36).slice(-8), // 더미 비밀번호 -> 실제 유저는 안씀
+        password: Math.random().toString(36).slice(-8), // 더미 비밀번호
         name: displayName,
-        google_id
-      })
-
-      await user.save()
+        google_id,
+      });
+      await user.save();
     }
 
-    return user
+    return user;
   } catch (err) {
-    console.error('Google 로그인 처리 오류:', err)
-    throw err
+    console.error("Google 로그인 처리 오류:", err);
+    throw err;
   }
 }
 
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "https://mariopong-back-4cre.onrender.com/auth/google/callback",
-},
-async (accessToken, refreshToken, profile, done) => {
-  try {
-    const user = await registerOrLoginGoogleUser(profile)
-    return done(null, user)
-  } catch (err) {
-    return done(err, null)
-  }
-}))
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "https://mariopong-back-4cre.onrender.com/auth/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const user = await registerOrLoginGoogleUser(profile);
+        return done(null, user);
+      } catch (err) {
+        return done(err, null);
+      }
+    }
+  )
+);
 
 passport.serializeUser((user, done) => {
-  done(null, user._id) // 세션 또는 쿠키 저장용
-})
+  done(null, user._id);
+});
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id)
-    done(null, user)
+    const user = await User.findById(id);
+    done(null, user);
   } catch (err) {
-    done(err, null)
+    done(err, null);
   }
-})
+});
 
-module.exports = auth
-module.exports = passport
-module.exports = async function (req, res, next) {
-  const token = req.cookies.token
-  if (!token) {
-    return res.status(401).json({ isAuth: false, error: "Access Denied" })
-  }
-
-  try {
-    const decoded = jwt.verify(token, 'secretToken') // process.env.JWT_SECRET
-    const user = await User.findOne({
-      _id: decoded._id,
-      token: token, // DB에 저장된 token과 일치하는지 확인
-    })
-
-    if (!user) {
-      return res.status(401).json({ isAuth: false, error: "User not found or logged out" })
-    }
-
-    req.user = user
-    next()
-  } catch (err) {
-    return res.status(403).json({ isAuth: false, error: "Invalid Token" })
-  }
-}
+module.exports = {
+  authMiddleware,
+  passport,
+};
