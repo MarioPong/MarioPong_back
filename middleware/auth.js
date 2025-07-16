@@ -84,7 +84,7 @@ module.exports = async function (req, res, next) {
 
   try {
     const verified = jwt.verify(token, 'secretToken')
-    const user = await User.findOne({ _id: verified, token })
+    const user = await User.findByToken(token)
     if (!user) return res.status(401).json({ isAuth: false, error: "Unauthenticated" })
 
     req.user = user
