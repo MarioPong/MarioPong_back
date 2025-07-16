@@ -11,7 +11,7 @@ const authMiddleware = async function (req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, 'secretToken'); // 🔁 보안을 위해 process.env.JWT_SECRET 사용 권장
+    const decoded = jwt.verify(token, 'secretToken'); 
     const user = await User.findOne({ _id: decoded._id, token });
 
     if (!user) {

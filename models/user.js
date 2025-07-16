@@ -78,17 +78,32 @@ userSchema.methods.comparePassword = function (plainPassword) {
   return bcrypt.compare(plainPassword, this.password)
 }
 
+// userSchema.methods.generateToken = async function () {
+//   const user = this
+//   try {
+//     const token = jwt.sign(user._id.toHexString(), "secretToken")
+//     user.token = token
+//     await user.save()
+//     return user
+//   } catch (err) {
+//     throw err
+//   }
+// }
+
 userSchema.methods.generateToken = async function () {
-  const user = this
+  const user = this;
   try {
-    const token = jwt.sign(user._id.toHexString(), "secretToken")
-    user.token = token
-    await user.save()
-    return user
+    const token = jwt.sign(
+      { _id: user._id.toHexString() },
+      "secretToken"        
+    );
+    user.token = token;
+    await user.save();
+    return user;
   } catch (err) {
-    throw err
+    throw err;
   }
-}
+};
 
 userSchema.statics.findByToken = async function(token) {
   try {
