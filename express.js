@@ -30,10 +30,10 @@ app.use(cors({
   credentials: true
 }));
 
-app.options("/socket.io/*", cors({
-  origin: ["https://mario-pong.netlify.app"],
-  credentials: true
-}))
+// app.options("/socket.io/*", cors({
+//   origin: ["https://mario-pong.netlify.app"],
+//   credentials: true
+// }))
 
 app.use(session({
   secret: 'janmangjeonginyesdap', // 실제 서비스에서는 안전하게 관리
