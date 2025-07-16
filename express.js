@@ -93,7 +93,7 @@ app.get(
       })
 
       // 로그인 성공 후 리디렉션
-      res.redirect(GOOGLE_REDIRECT_URL)
+      res.redirect(process.env.GOOGLE_REDIRECT_URL)
     } catch (err) {
       console.error('토큰 발급 중 오류:', err)
       res.redirect('https://mario-pong.netlify.app/login.html?error=token')
