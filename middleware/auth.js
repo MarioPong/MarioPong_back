@@ -78,18 +78,18 @@ passport.deserializeUser(async (id, done) => {
 
 module.exports = auth
 module.exports = passport
-module.exports = async function (req, res, next) {
-  const token = req.cookies.token
-  if (!token) return res.status(401).send('Access Denied')
+// module.exports = async function (req, res, next) {
+//   const token = req.cookies.token
+//   if (!token) return res.status(401).send('Access Denied')
 
-  try {
-    const verified = jwt.verify(token, 'secretToken')
-    const user = await User.findOne({ _id: verified, token })
-    if (!user) return res.status(401).send('Unauthenticated')
+//   try {
+//     const verified = jwt.verify(token, 'secretToken')
+//     const user = await User.findOne({ _id: verified, token })
+//     if (!user) return res.status(401).send('Unauthenticated')
 
-    req.user = user
-    next()
-  } catch (err) {
-    return res.status(403).send('Invalid token')
-  }
-}
+//     req.user = user
+//     next()
+//   } catch (err) {
+//     return res.status(403).send('Invalid token')
+//   }
+// }
