@@ -80,12 +80,20 @@ module.exports = auth
 module.exports = passport
 module.exports = async function (req, res, next) {
   const token = req.cookies.token
-  if (!token) return res.status(401).json({ isAuth: false, error: "Access Denied" })
+  if (!token) {
+    return res.status(401).json({ isAuth: false, error: "Access Denied" })
+  }
 
   try {
-    const verified = jwt.verify(token, 'secretToken')
-    const user = await User.findByToken(token)
-    if (!user) return res.status(401).json({ isAuth: false, error: "Unauthenticated" })
+    const decoded = jwt.verify(token, 'secretToken') // process.env.JWT_SECRET
+    const user = await User.findOne({
+      _id: decoded._id,
+      token: token, // DB에 저장된 token과 일치하는지 확인
+    })
+
+    if (!user) {
+      return res.status(401).json({ isAuth: false, error: "User not found or logged out" })
+    }
 
     req.user = user
     next()

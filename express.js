@@ -309,7 +309,7 @@ app.get("/api/user/logout", auth, async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, message: "사용자를 찾을 수 없습니다." })
     }
-    res.clearCookie("x_auth", {
+    res.clearCookie("token", {
       httpOnly: true,
       sameSite: "none",
       secure: true
